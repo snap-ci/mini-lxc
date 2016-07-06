@@ -24,8 +24,7 @@ class LXC
       exec build_command(["lxc-ls"], options), &block
     end
 
-    def attach(name, command, &block)
-      options = ["-l", "DEBUG"]
+    def attach(name, command, options=["--clear-env", ["-o", "/dev/stdout"], ["-l", "DEBUG"]], &block)
       exec build_command(["lxc-attach", "-n", name, "--", command], options), &block
     end
 

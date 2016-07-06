@@ -1,9 +1,6 @@
 class LXC
   module Interaction
-    def exec(command, &block)
-      command = command.join(" ") if command.is_a?(Array)
-
-      info "[LXC] execute: #{command.inspect}"
+    def __run_in_subprocess(command)
       output = ""
 
       r, w = IO.pipe
@@ -18,6 +15,14 @@ class LXC
 
       _, status = Process.waitpid2(pid)
 
+      [pid, status, output]
+    end
+
+    def exec(command, &block)
+      command = command.join(" ") if command.is_a?(Array)
+
+      info "[LXC] execute: #{command.inspect}"
+      pid, status, output = __run_in_subprocess(command)
       info "[LXC] completed with status #{status.inspect}: #{command.inspect}"
 
       if block_given?
