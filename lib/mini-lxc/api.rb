@@ -1,4 +1,4 @@
-class LXC
+class MiniLXC
   module Api
     def start_ephemeral(original, name, options=["-d"], &block)
       exec build_command(["lxc-start-ephemeral", "-o", original, "-n", name], options), &block

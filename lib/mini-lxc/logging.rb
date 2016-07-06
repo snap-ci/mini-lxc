@@ -1,4 +1,4 @@
-class LXC
+class MiniLXC
   module Logging
     def use_logger(logger)
       @logger = logger

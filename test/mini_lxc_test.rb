@@ -1,6 +1,6 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
 
-class LXCTest < Minitest::Test
+class MiniLXCTest < Minitest::Test
 
   include FakeExec
 
@@ -9,28 +9,28 @@ class LXCTest < Minitest::Test
   end
 
   def test_build_command_injects_options_into_base_command
-    assert_equal "lxc-info -n test-container -q -o lxc.log", LXC.build_command(["lxc-info", "-n", "test-container"], ["-q", ["-o", "lxc.log"]]).join(" ")
+    assert_equal "lxc-info -n test-container -q -o lxc.log", MiniLXC.build_command(["lxc-info", "-n", "test-container"], ["-q", ["-o", "lxc.log"]]).join(" ")
   end
 
   def test_build_command_handles_gnu_options
-    assert_equal "lxc-info -q --name=test-container", LXC.build_command(["lxc-info"], ["-q", ["--name", "test-container"]]).join(" ")
+    assert_equal "lxc-info -q --name=test-container", MiniLXC.build_command(["lxc-info"], ["-q", ["--name", "test-container"]]).join(" ")
   end
 
   def test_build_command_allows_repeated_options
-    assert_equal "lxc-attach -n test-container -v FOO=BAR -v BAZ=QUU", LXC.build_command(["lxc-attach", "-n", "test-container"], [["-v", "FOO=BAR"], ["-v", "BAZ=QUU"]]).join(" ")
+    assert_equal "lxc-attach -n test-container -v FOO=BAR -v BAZ=QUU", MiniLXC.build_command(["lxc-attach", "-n", "test-container"], [["-v", "FOO=BAR"], ["-v", "BAZ=QUU"]]).join(" ")
   end
 
   def test_build_command_allows_repeated_options
-    assert_equal "lxc-attach -n test-container -v FOO=BAR -v BAZ=QUU", LXC.build_command(["lxc-attach", "-n", "test-container"], [["-v", "FOO=BAR"], ["-v", "BAZ=QUU"]]).join(" ")
+    assert_equal "lxc-attach -n test-container -v FOO=BAR -v BAZ=QUU", MiniLXC.build_command(["lxc-attach", "-n", "test-container"], [["-v", "FOO=BAR"], ["-v", "BAZ=QUU"]]).join(" ")
   end
 
   def test_build_command_knows_when_to_terminate_options
-    assert_equal "lxc-attach --clear-env -q --name=test-container -l DEBUG -- uname -a", LXC.build_command(["lxc-attach", "--", "uname -a"], ["--clear-env", "-q", ["--name", "test-container"], ["-l", "DEBUG"]]).join(" ")
+    assert_equal "lxc-attach --clear-env -q --name=test-container -l DEBUG -- uname -a", MiniLXC.build_command(["lxc-attach", "--", "uname -a"], ["--clear-env", "-q", ["--name", "test-container"], ["-l", "DEBUG"]]).join(" ")
   end
 
   def test_exec_can_take_a_block
     stub_spawn(2, 0, "hello world\n") do
-      result = LXC.exec("echo 'hello world'") do |pid, status, output|
+      result = MiniLXC.exec("echo 'hello world'") do |pid, status, output|
         assert_equal 2, pid, "should get pid as first argument"
         assert_equal 0, status.exitstatus, "should get status object as second argument"
         assert_equal "hello world\n", output, "should get output as third argument"
@@ -44,7 +44,7 @@ class LXCTest < Minitest::Test
 
   def test_exec_returns_pid_status_and_output
     stub_spawn(5, 1, "nope!") do
-      pid, status, output = LXC.exec("cat /dev/null")
+      pid, status, output = MiniLXC.exec("cat /dev/null")
 
       assert_equal 5, pid
       assert_equal 1, status.exitstatus
@@ -54,8 +54,8 @@ class LXCTest < Minitest::Test
 
   def test_start_ephemeral
     stub_spawn(2, 0, "something") do
-      LXC.start_ephemeral("original-container", "test")
-      LXC.start_ephemeral("original-container", "test", ["-d", ["--bdir", "/mnt/foodisk"]])
+      MiniLXC.start_ephemeral("original-container", "test")
+      MiniLXC.start_ephemeral("original-container", "test", ["-d", ["--bdir", "/mnt/foodisk"]])
     end
 
     assert_equal ["lxc-start-ephemeral -o original-container -n test -d", "lxc-start-ephemeral -o original-container -n test -d --bdir=/mnt/foodisk"], @commands
@@ -63,8 +63,8 @@ class LXCTest < Minitest::Test
 
   def test_clone
     stub_spawn(2, 0, "something") do
-      LXC.clone("original-container", "test")
-      LXC.clone("original-container", "test", ["-M", ["-P", "/opt/lxc"]])
+      MiniLXC.clone("original-container", "test")
+      MiniLXC.clone("original-container", "test", ["-M", ["-P", "/opt/lxc"]])
     end
 
     assert_equal ["lxc-clone -o original-container -n test -s --backingstore=overlayfs", "lxc-clone -o original-container -n test -M -P /opt/lxc"], @commands
@@ -72,8 +72,8 @@ class LXCTest < Minitest::Test
 
   def test_start
     stub_spawn(2, 0, "something") do
-      LXC.start("test")
-      LXC.start("test", ["-d", ["-v", "RBENV_DEBUG=true"], ["-v", "BUNDLER_PATH=/opt/local/bundle"]])
+      MiniLXC.start("test")
+      MiniLXC.start("test", ["-d", ["-v", "RBENV_DEBUG=true"], ["-v", "BUNDLER_PATH=/opt/local/bundle"]])
     end
 
     assert_equal ["lxc-start -n test -d", "lxc-start -n test -d -v RBENV_DEBUG=true -v BUNDLER_PATH=/opt/local/bundle"], @commands
@@ -81,8 +81,8 @@ class LXCTest < Minitest::Test
 
   def test_stop
     stub_spawn(2, 0, "something") do
-      LXC.stop("test")
-      LXC.stop("test", ["-r"])
+      MiniLXC.stop("test")
+      MiniLXC.stop("test", ["-r"])
     end
 
     assert_equal ["lxc-stop -n test", "lxc-stop -n test -r"], @commands
@@ -90,8 +90,8 @@ class LXCTest < Minitest::Test
 
   def test_destroy
     stub_spawn(2, 0, "something") do
-      LXC.destroy("test")
-      LXC.destroy("test", ["-f"])
+      MiniLXC.destroy("test")
+      MiniLXC.destroy("test", ["-f"])
     end
 
     assert_equal ["lxc-destroy -n test", "lxc-destroy -n test -f"], @commands
@@ -99,8 +99,8 @@ class LXCTest < Minitest::Test
 
   def test_ls
     stub_spawn(2, 0, "something") do
-      LXC.ls
-      LXC.ls(["--running", "-1"])
+      MiniLXC.ls
+      MiniLXC.ls(["--running", "-1"])
     end
 
     assert_equal ["lxc-ls --active", "lxc-ls --running -1"], @commands
@@ -108,8 +108,8 @@ class LXCTest < Minitest::Test
 
   def test_attach
     stub_spawn(2, 0, "something") do
-      LXC.attach("test", "uname -r")
-      LXC.attach("test", "uname -r", ["-o", "lxc.log"])
+      MiniLXC.attach("test", "uname -r")
+      MiniLXC.attach("test", "uname -r", ["-o", "lxc.log"])
     end
 
     assert_equal ["lxc-attach -n test --clear-env -o /dev/stdout -l DEBUG -- uname -r", "lxc-attach -n test -o lxc.log -- uname -r"], @commands
@@ -117,7 +117,7 @@ class LXCTest < Minitest::Test
 
   def test_config
     stub_spawn(2, 0, "something") do
-      LXC.config("lxc.lxcpath")
+      MiniLXC.config("lxc.lxcpath")
     end
 
     assert_equal ["lxc-config lxc.lxcpath"], @commands

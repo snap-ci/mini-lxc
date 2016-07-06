@@ -6,7 +6,7 @@ class ContainerTest < Minitest::Test
 
   def setup
     @commands = []
-    @container = LXC::Container.new("test-container", "original-container")
+    @container = MiniLXC::Container.new("test-container", "original-container")
   end
 
   def test_running

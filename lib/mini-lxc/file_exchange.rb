@@ -1,4 +1,4 @@
-class LXC
+class MiniLXC
   module FileExchange
 
     # may refactor copy file and read file to use streams so we can deal with large files

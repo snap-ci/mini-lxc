@@ -4,9 +4,9 @@ require "minitest/hell"
 
 $: << File.expand_path("../lib", File.dirname(__FILE__))
 
-require "lxc"
+require "mini-lxc"
 
-LXC.use_logger(nil) # be quiet
+MiniLXC.use_logger(nil) # be quiet
 
 module FakeExec
 
@@ -41,7 +41,7 @@ module FakeExec
   end
 
   def stub_spawn(pid, status, output, &block)
-    LXC.stub :__run_in_subprocess, record_and_return(pid, status, output) do
+    MiniLXC.stub :__run_in_subprocess, record_and_return(pid, status, output) do
       block.call
     end
   end

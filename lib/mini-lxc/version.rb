@@ -1,3 +1,3 @@
-class LXC
+class MiniLXC
   VERSION = "0.1.0"
 end

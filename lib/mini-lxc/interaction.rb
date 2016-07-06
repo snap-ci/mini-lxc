@@ -1,4 +1,4 @@
-class LXC
+class MiniLXC
   module Interaction
     def __run_in_subprocess(command)
       output = ""
