@@ -1,7 +1,6 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
 
 class LXCTest < Minitest::Test
-  parallelize_me!
 
   include FakeExec
 
