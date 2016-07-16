@@ -45,6 +45,14 @@ class MiniLXC
     def read_file_from_container(path_on_container)
       MiniLXC.read_file_from_container(name, path_on_container)
     end
+
+    def stream_from_host_to_container(ios, target_path_on_container)
+      MiniLXC.stream_from_host_to_container(name, ios, target_path_on_container)
+    end
+
+    def stream_file_from_container(path_on_container, ios, &block)
+      MiniLXC.stream_file_from_container(name, path_on_container, ios, &block)
+    end
   end
 
 end

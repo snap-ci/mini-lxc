@@ -1,28 +1,48 @@
 class MiniLXC
   module Interaction
-    def __run_in_subprocess(command)
-      output = ""
+    def spawn_with_io(command, options)
+      output = options.delete(:out) || ""
+      input = options.delete(:in)
 
-      r, w = IO.pipe
-      pid = Process.spawn({}, command, 2=>1, :out => w)
-      w.close
+      ro, wo = IO.pipe
 
-      buffer_size = 1024 * 2
-      while buffer = r.read(buffer_size)
+      spawn_opts = {2 => 1, :out => wo}
+
+      unless input.nil?
+        ri, wi = IO.pipe
+        spawn_opts.update(:in => ri)
+      end
+
+      pid = Process.spawn({}, command, spawn_opts)
+      wo.close
+
+      unless input.nil?
+        ri.close
+
+        chunksize = options.delete(:in_chunk) || 16 * 1024 * 1024
+        while (chunk = input.read(chunksize))
+          wi.write(chunk)
+        end
+        wi.close
+      end
+
+      buffer_size = options.delete(:out_chunk) || 16 * 1024
+      while buffer = ro.read(buffer_size)
         output << buffer unless buffer.chomp.empty?
       end
-      r.close
+      ro.close
 
       _, status = Process.waitpid2(pid)
 
       [pid, status, output]
     end
+    private :spawn_with_io
 
-    def exec(command, &block)
+    def exec(command, options={:out => ""}, &block)
       command = command.join(" ") if command.is_a?(Array)
 
       info "[LXC] execute: #{command.inspect}"
-      pid, status, output = __run_in_subprocess(command)
+      pid, status, output = spawn_with_io(command, options)
       info "[LXC] completed with status #{status.inspect}: #{command.inspect}"
 
       if block_given?

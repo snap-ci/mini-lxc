@@ -1,3 +1,5 @@
+require "shellwords"
+
 require "mini-lxc/logging"
 require "mini-lxc/interaction"
 require "mini-lxc/file_exchange"

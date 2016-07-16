@@ -109,10 +109,10 @@ class MiniLXCTest < Minitest::Test
   def test_attach
     stub_spawn(2, 0, "something") do
       MiniLXC.attach("test", "uname -r")
-      MiniLXC.attach("test", "uname -r", ["-o", "lxc.log"])
+      MiniLXC.attach("test", "uname -r", ["-o", "lxc.log", ["--logpriority", "DEBUG"]])
     end
 
-    assert_equal ["lxc-attach -n test --clear-env -o /dev/stdout -l DEBUG -- uname -r", "lxc-attach -n test -o lxc.log -- uname -r"], @commands
+    assert_equal ["lxc-attach -n test --clear-env -o /dev/stdout -- uname -r", "lxc-attach -n test -o lxc.log --logpriority=DEBUG -- uname -r"], @commands
   end
 
   def test_config

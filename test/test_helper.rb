@@ -41,7 +41,7 @@ module FakeExec
   end
 
   def stub_spawn(pid, status, output, &block)
-    MiniLXC.stub :__run_in_subprocess, record_and_return(pid, status, output) do
+    MiniLXC.stub :spawn_with_io, record_and_return(pid, status, output) do
       block.call
     end
   end
