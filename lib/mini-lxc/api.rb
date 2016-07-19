@@ -4,7 +4,7 @@ class MiniLXC
       exec build_command(["lxc-start-ephemeral", "-o", original, "-n", name], params), options, &block
     end
 
-    def clone(original, name, params=["-s", ["--backingstore", "overlayfs"]], options={}, &block)
+    def clone(original, name, params=["-s", "--backingstore=overlayfs"], options={}, &block)
       exec build_command(["lxc-clone", "-o", original, "-n", name], params), options, &block
     end
 
@@ -24,7 +24,7 @@ class MiniLXC
       exec build_command(["lxc-ls"], params), options, &block
     end
 
-    def attach(name, command, params=["--clear-env", ["-o", "/dev/stdout"]], options={}, &block)
+    def attach(name, command, params=["--clear-env", "-o", "/dev/stdout"], options={}, &block)
       exec build_command(["lxc-attach", "-n", name, "--", command], params), options, &block
     end
 

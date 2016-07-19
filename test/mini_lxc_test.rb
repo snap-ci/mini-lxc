@@ -12,20 +12,12 @@ class MiniLXCTest < Minitest::Test
     assert_equal "lxc-info -n test-container -q -o lxc.log", MiniLXC.build_command(["lxc-info", "-n", "test-container"], ["-q", ["-o", "lxc.log"]]).join(" ")
   end
 
-  def test_build_command_handles_gnu_options
-    assert_equal "lxc-info -q --name=test-container", MiniLXC.build_command(["lxc-info"], ["-q", ["--name", "test-container"]]).join(" ")
-  end
-
   def test_build_command_allows_repeated_options
-    assert_equal "lxc-attach -n test-container -v FOO=BAR -v BAZ=QUU", MiniLXC.build_command(["lxc-attach", "-n", "test-container"], [["-v", "FOO=BAR"], ["-v", "BAZ=QUU"]]).join(" ")
-  end
-
-  def test_build_command_allows_repeated_options
-    assert_equal "lxc-attach -n test-container -v FOO=BAR -v BAZ=QUU", MiniLXC.build_command(["lxc-attach", "-n", "test-container"], [["-v", "FOO=BAR"], ["-v", "BAZ=QUU"]]).join(" ")
+    assert_equal "lxc-attach -n test-container -v FOO=BAR -v BAZ=QUU", MiniLXC.build_command(["lxc-attach", "-n", "test-container"], ["-v", "FOO=BAR", "-v", "BAZ=QUU"]).join(" ")
   end
 
   def test_build_command_knows_when_to_terminate_options
-    assert_equal "lxc-attach --clear-env -q --name=test-container -l DEBUG -- uname -a", MiniLXC.build_command(["lxc-attach", "--", "uname -a"], ["--clear-env", "-q", ["--name", "test-container"], ["-l", "DEBUG"]]).join(" ")
+    assert_equal "lxc-attach --clear-env -q --name=test-container -l DEBUG -- uname -a", MiniLXC.build_command(["lxc-attach", "--", "uname -a"], ["--clear-env", "-q", "--name=test-container", "-l", "DEBUG"]).join(" ")
   end
 
   def test_exec_can_take_a_block
@@ -55,7 +47,7 @@ class MiniLXCTest < Minitest::Test
   def test_start_ephemeral
     stub_spawn(2, 0, "something") do
       MiniLXC.start_ephemeral("original-container", "test")
-      MiniLXC.start_ephemeral("original-container", "test", ["-d", ["--bdir", "/mnt/foodisk"]])
+      MiniLXC.start_ephemeral("original-container", "test", ["-d", "--bdir=/mnt/foodisk"])
     end
 
     assert_equal ["lxc-start-ephemeral -o original-container -n test -d", "lxc-start-ephemeral -o original-container -n test -d --bdir=/mnt/foodisk"], @commands
@@ -109,7 +101,7 @@ class MiniLXCTest < Minitest::Test
   def test_attach
     stub_spawn(2, 0, "something") do
       MiniLXC.attach("test", "uname -r")
-      MiniLXC.attach("test", "uname -r", ["-o", "lxc.log", ["--logpriority", "DEBUG"]])
+      MiniLXC.attach("test", "uname -r", ["-o", "lxc.log", "--logpriority=DEBUG"])
     end
 
     assert_equal ["lxc-attach -n test --clear-env -o /dev/stdout -- uname -r", "lxc-attach -n test -o lxc.log --logpriority=DEBUG -- uname -r"], @commands

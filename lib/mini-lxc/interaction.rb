@@ -61,19 +61,11 @@ class MiniLXC
         terminal = base_command.slice!(reverse, reverse.abs)
       end
 
-      # options should be array, not hash because certain options are repeatable e.g. --bdir
-      options.each do |opt|
-        if opt.is_a?(Array)
-          # build GNU-style options differently
-          base_command << (opt.first.start_with?("--") ? opt.join("=") : opt.join(" "))
-        else
-          base_command << opt
-        end
-      end
-
+      base_command += options.flatten
       base_command += terminal unless terminal.empty?
 
       base_command
     end
+
   end
 end

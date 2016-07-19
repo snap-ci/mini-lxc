@@ -30,7 +30,7 @@ class MiniLXC
     def stream_file_from_container(name, path_on_container, ios, &block)
       info "[LXC] STREAM FILE IN CONTAINER #{name}: #{path_on_container} => #{ios.inspect}"
 
-      exec Shellwords.join(["lxc-attach", "-n", name, "--", "/bin/cat", path_on_container], :out => ios, &block)
+      exec Shellwords.join(["lxc-attach", "-n", name, "--", "/bin/cat", path_on_container]), :out => ios, &block
     end
 
   end
