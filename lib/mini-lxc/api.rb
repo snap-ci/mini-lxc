@@ -1,7 +1,20 @@
 class MiniLXC
   module Api
+
     def start_ephemeral(original, name, params=["-d"], options={}, &block)
       exec build_command(["lxc-start-ephemeral", "-o", original, "-n", name], params), options, &block
+    end
+
+    def create(name, type, template_params=[], params=[], options={}, &block)
+      base_command = ["lxc-create", "-n", name, "-t", type]
+      base_command += ["--", template_params].flatten if template_params && !template_params.empty?
+
+      if params.is_a?(Hash)
+        options = params
+        params = []
+      end
+
+      exec build_command(base_command, params), options, &block
     end
 
     def clone(original, name, params=["-s", "--backingstore=overlayfs"], options={}, &block)
@@ -31,5 +44,6 @@ class MiniLXC
     def config(key, options={}, &block)
       exec ["lxc-config", key], options, &block
     end
+
   end
 end

@@ -44,6 +44,39 @@ class MiniLXCTest < Minitest::Test
     end
   end
 
+  def test_version_detection
+    stub_spawn(2, 0, "1.0.8") do
+      assert_equal "1.0.8", MiniLXC.lxc_version.to_s
+      assert MiniLXC.lxc_v1?
+      refute MiniLXC.lxc_v2?
+    end
+
+    stub_spawn(2, 0, "2.0.3") do
+      assert_equal "2.0.3", MiniLXC.lxc_version.to_s
+      refute MiniLXC.lxc_v1?
+      assert MiniLXC.lxc_v2?
+    end
+  end
+
+  def test_create
+    stub_spawn(2, 0, "something") do
+      MiniLXC.create("new-container", "ubuntu")
+      MiniLXC.create("new-container", "download", %w(-d ubuntu -r trusty -a amd64))
+      MiniLXC.create("new-container", "download", %w(-d centos -r 7 -a amd64), :out => StringIO.new(""))
+      MiniLXC.create("new-container", "download", %w(-d debian -r wheezy -a amd64), [], :out => StringIO.new(""))
+      MiniLXC.create("new-container", "download", %w(-d ubuntu -r precise -a amd64), %w(-f new-lxc.config -B zfs))
+    end
+
+    expected = [
+      "lxc-create -n new-container -t ubuntu",
+      "lxc-create -n new-container -t download -- -d ubuntu -r trusty -a amd64",
+      "lxc-create -n new-container -t download -- -d centos -r 7 -a amd64",
+      "lxc-create -n new-container -t download -- -d debian -r wheezy -a amd64",
+      "lxc-create -n new-container -t download -f new-lxc.config -B zfs -- -d ubuntu -r precise -a amd64"
+    ]
+    assert_equal expected, @commands
+  end
+
   def test_start_ephemeral
     stub_spawn(2, 0, "something") do
       MiniLXC.start_ephemeral("original-container", "test")

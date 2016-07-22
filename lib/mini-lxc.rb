@@ -15,4 +15,5 @@ class MiniLXC
   extend Interaction
   extend FileExchange
   extend Api
+  extend Version
 end
