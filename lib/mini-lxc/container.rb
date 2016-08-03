@@ -67,6 +67,7 @@ class MiniLXC
     end
 
     def destroy(options={:params => ["-f"]})
+      params = (options || {}).delete(:params) || []
       MiniLXC.destroy(name, params)
     end
 
