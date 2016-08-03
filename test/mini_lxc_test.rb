@@ -58,20 +58,25 @@ class MiniLXCTest < Minitest::Test
     end
   end
 
-  def test_create
+  def test_create_unprivileged
     stub_spawn(2, 0, "something") do
-      MiniLXC.create("new-container", "ubuntu")
-      MiniLXC.create("new-container", "download", %w(-d ubuntu -r trusty -a amd64))
-      MiniLXC.create("new-container", "download", %w(-d centos -r 7 -a amd64), :out => StringIO.new(""))
-      MiniLXC.create("new-container", "download", %w(-d debian -r wheezy -a amd64), [], :out => StringIO.new(""))
-      MiniLXC.create("new-container", "download", %w(-d ubuntu -r precise -a amd64), %w(-f new-lxc.config -B zfs))
+      # accepts short opts
+      MiniLXC.create_unprivileged("new-container", {:d => "ubuntu", :r => "trusty", :a => "amd64"})
+
+      # accepts GNU longopts too
+      MiniLXC.create_unprivileged("new-container", {:dist => "centos", :r => 7, :arch => "amd64"}, [], :out => StringIO.new(""))
+
+      # defaults to --arch amd64
+      MiniLXC.create_unprivileged("new-container", {:dist => "debian", :release => "wheezy"}, [], :out => StringIO.new(""))
+
+      # accepts params for command which are kept separate from template options
+      MiniLXC.create_unprivileged("new-container", {:d => "ubuntu", :r => "precise", :a => "amd64"}, %w(-f new-lxc.config -B zfs))
     end
 
     expected = [
-      "lxc-create -n new-container -t ubuntu",
       "lxc-create -n new-container -t download -- -d ubuntu -r trusty -a amd64",
-      "lxc-create -n new-container -t download -- -d centos -r 7 -a amd64",
-      "lxc-create -n new-container -t download -- -d debian -r wheezy -a amd64",
+      "lxc-create -n new-container -t download -- --dist centos -r 7 --arch amd64",
+      "lxc-create -n new-container -t download -- --dist debian --release wheezy --arch amd64",
       "lxc-create -n new-container -t download -f new-lxc.config -B zfs -- -d ubuntu -r precise -a amd64"
     ]
     assert_equal expected, @commands
@@ -79,20 +84,20 @@ class MiniLXCTest < Minitest::Test
 
   def test_start_ephemeral
     stub_spawn(2, 0, "something") do
-      MiniLXC.start_ephemeral("original-container", "test")
-      MiniLXC.start_ephemeral("original-container", "test", ["-d", "--bdir=/mnt/foodisk"])
+      MiniLXC.start_ephemeral("test", "original-container")
+      MiniLXC.start_ephemeral("test", "original-container", ["-d", "--bdir=/mnt/foodisk"])
     end
 
-    assert_equal ["lxc-start-ephemeral -o original-container -n test -d", "lxc-start-ephemeral -o original-container -n test -d --bdir=/mnt/foodisk"], @commands
+    assert_equal ["lxc-start-ephemeral -n test -o original-container -d", "lxc-start-ephemeral -n test -o original-container -d --bdir=/mnt/foodisk"], @commands
   end
 
   def test_clone
     stub_spawn(2, 0, "something") do
-      MiniLXC.clone("original-container", "test")
-      MiniLXC.clone("original-container", "test", ["-M", ["-P", "/opt/lxc"]])
+      MiniLXC.clone("test", "original-container")
+      MiniLXC.clone("test", "original-container", ["-M", ["-P", "/opt/lxc"]])
     end
 
-    assert_equal ["lxc-clone -o original-container -n test -s --backingstore=overlayfs", "lxc-clone -o original-container -n test -M -P /opt/lxc"], @commands
+    assert_equal ["lxc-clone -n test -o original-container -s --backingstore=overlayfs", "lxc-clone -n test -o original-container -M -P /opt/lxc"], @commands
   end
 
   def test_start

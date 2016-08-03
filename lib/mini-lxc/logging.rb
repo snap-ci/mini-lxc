@@ -8,10 +8,6 @@ class MiniLXC
       @logger.send(level, message) if @logger
     end
 
-    def info(message)
-      log(message, :info)
-    end
-
     def debug(message)
       log(message, :debug)
     end

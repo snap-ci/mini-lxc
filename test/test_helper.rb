@@ -34,7 +34,7 @@ module FakeExec
   end
 
   def record_and_return(pid, status, output)
-    Proc.new do |command|
+    Proc.new do |command, options|
       (@commands ||= []) << command
       [pid, FakeStatus.new(status, pid), output]
     end

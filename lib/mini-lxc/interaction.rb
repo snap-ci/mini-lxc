@@ -41,9 +41,9 @@ class MiniLXC
     def exec(command, options={:out => ""}, &block)
       command = command.join(" ") if command.is_a?(Array)
 
-      info "[LXC] execute: #{command.inspect}"
+      log "[LXC] execute: #{command.inspect}"
       pid, status, output = spawn_with_io(command, options)
-      info "[LXC] completed with status #{status.inspect}: #{command.inspect}"
+      log "[LXC] completed with status #{status.inspect}: #{command.inspect}"
 
       if block_given?
         block.call(pid, status, output)

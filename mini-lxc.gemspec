@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/snap-ci/mini-lxc"
   s.description = <<-EOF
     mini-lxc is a Ruby frontend to the LXC command-line API, allowing
-    Ruby scripts to create and manage Linux containers.
+    Ruby scripts to create and manage Linux containers. mini-lxc is
+    developed and tested with unprivileged containers in mind.
   EOF
 end

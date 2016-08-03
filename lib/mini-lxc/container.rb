@@ -1,32 +1,80 @@
+require "yaml"
+
 class MiniLXC
-  # This class is purely for convenience. It wraps calls to the static methods on MiniLXC, so
-  # everything that an instance does can be done using the MiniLXC api alone.
+  # This class represents the high-level API, which provides some abstractions and conveniences for container
+  # creation and management. It wraps calls to the static methods on MiniLXC, so everything that an instance
+  # does can be done using the MiniLXC api alone if more fine-tuned control is needed
   class Container
-    attr_reader :name, :base_container
 
-    def initialize(name, base_container)
+    attr_reader :name
+
+    class << self
+      def create_unprivileged(name, template_spec={:distro => "ubuntu", :release => "trusty"}, options={})
+        params = (options || {}).delete(:params) || []
+        pid, status, output = MiniLXC.create_unprivileged(name, template_spec, params, options)
+        raise "Failed to create container #{name} (exited with status #{status.to_i}: #{output}" unless status.success?
+        self.new(name)
+      end
+
+      def create_from_base_container(name, base_container, options={})
+        params = (options || {}).delete(:params)
+
+        pid, status, output = if MiniLXC.lxc_v1?
+          params ||= ["-s", "-B", "overlayfs"]
+          MiniLXC.clone(name, base_container, params, options)
+        else
+          params ||= ["-s", "-B", "overlay"]
+          MiniLXC.copy(name, base_container, params, options)
+        end
+
+        raise "Failed to create container #{name} (exited with status #{status.to_i}: #{output}" unless status.success?
+        self.new(name)
+      end
+
+      def ephemeral(name, base_container, options={})
+        params = (options || {}).delete(:params)
+
+        pid, status, output = if MiniLXC.lxc_v1?
+          params ||= ["-s", "-d", "-B", "overlayfs"]
+          MiniLXC.start_ephemeral(name, base_container, params, options)
+        else
+          params = (["-e"] + (params || ["-s", "-d", "-B", "overlay"])).uniq
+          MiniLXC.copy(name, base_container, params, options)
+        end
+
+        raise "Failed to create container #{name} (exited with status #{status.to_i}: #{output}" unless status.success?
+        self.new(name)
+      end
+    end
+
+    def initialize(name)
       @name = name
-      @base_container = base_container
     end
 
-    def attach(command)
-      MiniLXC.attach(name, command)
+    def attach(command, options={})
+      params = (options || {}).delete(:params) || []
+      MiniLXC.attach(name, command, params, options)
     end
 
-    def reify
-      MiniLXC.clone(base_container, name)
+    def start(options={:params => ["-d"]})
+      params = (options || {}).delete(:params) || []
+      MiniLXC.start(name, params)
     end
 
-    def start(options=["-d"])
-      MiniLXC.start(name, options)
+    def stop(options={})
+      params = (options || {}).delete(:params) || []
+      MiniLXC.stop(name, params)
     end
 
-    def stop
-      MiniLXC.stop(name)
+    def destroy(options={:params => ["-f"]})
+      MiniLXC.destroy(name, params)
     end
 
-    def destroy
-      MiniLXC.destroy(name)
+    def state(name)
+      MiniLXC.info(name, ["-s"]) do |pid, status, output|
+        raise "Could not read state of container #{name}. Does it exist? Output: #{output}" unless status.success?
+        YAML.load(output)["State"]
+      end
     end
 
     def running?
