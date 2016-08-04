@@ -71,6 +71,12 @@ class MiniLXC
       MiniLXC.destroy(name, params)
     end
 
+    def defined?
+      MiniLXC.ls(["-1"]) do |pid, status, output|
+        output.split("\n").compact.map(&:strip).include?(name)
+      end
+    end
+
     def state(name)
       MiniLXC.info(name, ["-s"]) do |pid, status, output|
         raise "Could not read state of container #{name}. Does it exist? Output: #{output}" unless status.success?

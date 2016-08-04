@@ -19,6 +19,16 @@ class ContainerTest < Minitest::Test
     end
   end
 
+  def test_defined
+    stub_spawn(2, 0, "original-container\n") do
+      assert !@container.defined?
+    end
+
+    stub_spawn(2, 0, "original-container\ntest-container\nfoo-container\n") do
+      assert @container.defined?
+    end
+  end
+
   def test_create_unprivileged
     stub_spawn(2, 0, "ok") do
       @container = MiniLXC::Container.create_unprivileged("test-ubuntu", {:dist => "ubuntu", :release => "xenial"}, :params => %w(-B overlay))
