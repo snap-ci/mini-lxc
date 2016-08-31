@@ -71,7 +71,7 @@ class MiniLXC
       MiniLXC.destroy(name, params)
     end
 
-    def defined?
+    def exist?
       MiniLXC.ls(["-1"]) do |pid, status, output|
         output.split("\n").compact.map(&:strip).include?(name)
       end
