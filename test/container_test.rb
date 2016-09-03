@@ -19,13 +19,13 @@ class ContainerTest < Minitest::Test
     end
   end
 
-  def test_defined
+  def test_exist
     stub_spawn(2, 0, "original-container\n") do
-      assert !@container.defined?
+      assert !@container.exist?
     end
 
     stub_spawn(2, 0, "original-container\ntest-container\nfoo-container\n") do
-      assert @container.defined?
+      assert @container.exist?
     end
   end
 
