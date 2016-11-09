@@ -1,9 +1,9 @@
 class MiniLXC
-  module Logging
-    def use_logger(logger)
-      @logger = logger
-    end
+  class << self
+    attr_accessor :default_logger
+  end
 
+  module Logging
     def log(message, level=:info)
       @logger.send(level, message) if @logger
     end

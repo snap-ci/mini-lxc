@@ -1,6 +1,7 @@
 require File.expand_path("test_helper", File.dirname(__FILE__))
 
 class ContainerTest < Minitest::Test
+  parallelize_me!
 
   include FakeExec
 
@@ -10,42 +11,45 @@ class ContainerTest < Minitest::Test
   end
 
   def test_running
-    stub_spawn(2, 0, "original-container\n") do
+    stub_spawn(@container.api, 2, 0, "original-container\n") do
       assert !@container.running?
     end
 
-    stub_spawn(2, 0, "original-container\ntest-container\nfoo-container\n") do
+    stub_spawn(@container.api, 2, 0, "original-container\ntest-container\nfoo-container\n") do
       assert @container.running?
     end
   end
 
   def test_exist
-    stub_spawn(2, 0, "original-container\n") do
+    stub_spawn(@container.api, 2, 0, "original-container\n") do
       assert !@container.exist?
     end
 
-    stub_spawn(2, 0, "original-container\ntest-container\nfoo-container\n") do
+    stub_spawn(@container.api, 2, 0, "original-container\ntest-container\nfoo-container\n") do
       assert @container.exist?
     end
   end
 
   def test_create_unprivileged
-    stub_spawn(2, 0, "ok") do
-      @container = MiniLXC::Container.create_unprivileged("test-ubuntu", {:dist => "ubuntu", :release => "xenial"}, :params => %w(-B overlay))
+    api = MiniLXC.new
+    stub_spawn(api, 2, 0, "ok") do
+      @container = MiniLXC::Container.create_unprivileged("test-ubuntu", {:dist => "ubuntu", :release => "xenial"}, :params => %w(-B overlay), :client => api)
     end
+
     assert_equal ["lxc-create -n test-ubuntu -t download -B overlay -- --dist ubuntu --release xenial --arch amd64"], @commands
     assert_equal "test-ubuntu", @container.name
   end
 
   def test_create_from_base_container
-    stub_spawn(2, 0, "ok") do
-      MiniLXC.stub :lxc_version, Gem::Version.new("1.0.8") do
-        @container = MiniLXC::Container.create_from_base_container("lxc-1-container", "original-container")
+    api = MiniLXC.new
+    stub_spawn(api, 2, 0, "ok") do
+      api.stub :lxc_version, Gem::Version.new("1.0.8") do
+        @container = MiniLXC::Container.create_from_base_container("lxc-1-container", "original-container", :client => api)
         assert_equal "lxc-1-container", @container.name
       end
 
-      MiniLXC.stub :lxc_version, Gem::Version.new("2.0.3") do
-        @container = MiniLXC::Container.create_from_base_container("lxc-2-container", "original-container")
+      api.stub :lxc_version, Gem::Version.new("2.0.3") do
+        @container = MiniLXC::Container.create_from_base_container("lxc-2-container", "original-container", :client => api)
         assert_equal "lxc-2-container", @container.name
       end
     end
@@ -54,14 +58,15 @@ class ContainerTest < Minitest::Test
   end
 
   def test_ephemeral
-    stub_spawn(2, 0, "ok") do
-      MiniLXC.stub :lxc_version, Gem::Version.new("1.0.8") do
-        @container = MiniLXC::Container.ephemeral("lxc-1-container", "original-container")
+    api = MiniLXC.new
+    stub_spawn(api, 2, 0, "ok") do
+      api.stub :lxc_version, Gem::Version.new("1.0.8") do
+        @container = MiniLXC::Container.ephemeral("lxc-1-container", "original-container", :client => api)
         assert_equal "lxc-1-container", @container.name
       end
 
-      MiniLXC.stub :lxc_version, Gem::Version.new("2.0.3") do
-        @container = MiniLXC::Container.ephemeral("lxc-2-container", "original-container")
+      api.stub :lxc_version, Gem::Version.new("2.0.3") do
+        @container = MiniLXC::Container.ephemeral("lxc-2-container", "original-container", :client => api)
         assert_equal "lxc-2-container", @container.name
       end
     end

@@ -1,15 +1,16 @@
 PATH
   remote: .
   specs:
-    mini-lxc (0.1.0)
+    mini-lxc (0.3.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    minitest (5.9.0)
+    minitest (5.9.1)
     rake (11.2.2)
 
 PLATFORMS
+  java
   ruby
 
 DEPENDENCIES
@@ -18,4 +19,4 @@ DEPENDENCIES
   rake (~> 11.2.2)
 
 BUNDLED WITH
-   1.12.5
+   1.13.6

@@ -1,9 +1,9 @@
 class MiniLXC
   module Api
 
-    def self.extended(base)
-      base.extend(LXCv2)
-      base.extend(LXCv1)
+    def self.included(base)
+      base.send(:include, LXCv2)
+      base.send(:include, LXCv1)
     end
 
     def create_unprivileged(name, template_spec={:dist => "ubuntu", :release => "trusty"}, params=[], exec_options={}, &block)

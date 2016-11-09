@@ -6,8 +6,6 @@ $: << File.expand_path("../lib", File.dirname(__FILE__))
 
 require "mini-lxc"
 
-MiniLXC.use_logger(nil) # be quiet
-
 module FakeExec
 
   class FakeStatus # a good-enough implementation of Process::Status
@@ -40,9 +38,9 @@ module FakeExec
     end
   end
 
-  def stub_spawn(pid, status, output, &block)
-    MiniLXC.stub :spawn_with_io, record_and_return(pid, status, output) do
-      block.call
+  def stub_spawn(instance, pid, status, output, &block)
+    instance.stub :spawn_with_io, record_and_return(pid, status, output) do
+      yield
     end
   end
 end

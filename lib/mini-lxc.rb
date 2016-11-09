@@ -8,12 +8,13 @@ require "mini-lxc/container"
 require "mini-lxc/version"
 
 class MiniLXC
-  def initialize; end
-  private :initialize
+  include Logging
+  include Interaction
+  include FileExchange
+  include Api
+  include Version
 
-  extend Logging
-  extend Interaction
-  extend FileExchange
-  extend Api
-  extend Version
+  def initialize(logger=MiniLXC.default_logger)
+    @logger = logger
+  end
 end
