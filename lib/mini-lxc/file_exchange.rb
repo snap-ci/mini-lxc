@@ -1,36 +1,25 @@
 class MiniLXC
   module FileExchange
 
-    # may refactor copy file and read file to use streams so we can deal with large files
     def copy_from_host_to_container(name, source_path_on_host, target_path_on_container)
       log "[LXC] COPY TO CONTAINER #{name}: #{source_path_on_host} => #{target_path_on_container}"
-
-      ensure_directory_exists_on_container = Shellwords.join(["lxc-attach", "-n", name, "--", "mkdir", "-p", File.dirname(target_path_on_container)])
-      cat_data_to_container = [
-        Shellwords.join(["cat", source_path_on_host]),
-        Shellwords.join(["lxc-attach", "-n", name, "--", "/bin/sh", "-c", "/bin/cat > " + Shellwords.escape(target_path_on_container)])
-      ].join(" | ")
-
-      exec ensure_directory_exists_on_container
-      exec cat_data_to_container
+      attach(name, Shellwords.join(["mkdir", "-p", File.dirname(target_path_on_container)]), nil)
+      stream_from_host_to_container(name, File.open(source_path_on_host), target_path_on_container)
     end
 
     def read_file_from_container(name, path_on_container)
       log "[LXC] READ FILE IN CONTAINER #{name}: #{path_on_container}"
-      exec Shellwords.join(["lxc-attach", "-n", name, "--", "/bin/cat", path_on_container])
+      stream_file_from_container(name, path_on_container, nil)
     end
 
-    def stream_from_host_to_container(name, ios, target_path_on_container)
+    def stream_from_host_to_container(name, ios, target_path_on_container, &block)
       log "[LXC] STREAM TO CONTAINER #{name}: #{ios.inspect} => #{target_path_on_container}"
-
-      stream_to_container = Shellwords.join(["lxc-attach", "-n", name, "--", "/bin/sh", "-c", "/bin/cat > " + Shellwords.escape(target_path_on_container)])
-      exec stream_to_container, :in => ios
+      attach(name, Shellwords.join(["/bin/sh", "-c", "/bin/cat > " + Shellwords.escape(target_path_on_container)]), nil, :in => ios, &block)
     end
 
     def stream_file_from_container(name, path_on_container, ios, &block)
       log "[LXC] STREAM FILE IN CONTAINER #{name}: #{path_on_container} => #{ios.inspect}"
-
-      exec Shellwords.join(["lxc-attach", "-n", name, "--", "/bin/cat", path_on_container]), :out => ios, &block
+      attach(name, Shellwords.join(["/bin/cat", path_on_container]), nil, :out => ios, &block)
     end
 
   end
