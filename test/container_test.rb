@@ -71,7 +71,7 @@ class ContainerTest < Minitest::Test
       end
     end
 
-    assert_equal ["lxc-start-ephemeral -n lxc-1-container -o original-container -s -d -B overlayfs", "lxc-copy -n original-container -N lxc-2-container -e -s -d -B overlay"], @commands
+    assert_equal ["lxc-start-ephemeral -n lxc-1-container -o original-container -d -U overlayfs", "lxc-copy -n original-container -N lxc-2-container -e -s -d -B overlay"], @commands
   end
 
 end

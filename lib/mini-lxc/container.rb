@@ -39,7 +39,7 @@ class MiniLXC
         api = (options || {}).delete(:client) || MiniLXC.new
 
         pid, status, output = if api.lxc_v1?
-          params ||= ["-s", "-d", "-B", "overlayfs"]
+          params ||= ["-d", "-U", "overlayfs"]
           api.start_ephemeral(name, base_container, params, options)
         else
           params = (["-e"] + (params || ["-s", "-d", "-B", "overlay"])).uniq
