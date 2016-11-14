@@ -9,7 +9,7 @@ class MiniLXC
       spawn_opts = {2 => 1, :out => wo}
 
       unless input.nil?
-        ri, wi = IO.pipe
+        ri, wi = IO.pipe(Encoding::ASCII_8BIT)
         spawn_opts.update(:in => ri)
       end
 
@@ -18,6 +18,7 @@ class MiniLXC
 
       unless input.nil?
         ri.close
+        wi.binmode
 
         chunksize = options.delete(:in_chunk) || 16 * 1024 * 1024
         while (chunk = input.read(chunksize))

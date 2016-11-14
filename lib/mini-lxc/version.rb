@@ -1,5 +1,5 @@
 class MiniLXC
-  VERSION = "0.3.1"
+  VERSION = "0.3.2"
 
   module Version
     def lxc_version
