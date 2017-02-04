@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.version    = MiniLXC::VERSION
   s.summary    = "Ruby API for LXC"
   s.author     = "Marques Lee"
-  s.email      = "snap-ci@thoughtworks.com"
+  s.email      = "malee@thoughtworks.com"
 
   s.files      = Dir.glob("lib/**/*.rb")
 
