@@ -1,0 +1,7 @@
+---
+language: ruby
+script: |
+  mkdir -p pkg
+  bundle exec rake test
+  gem build *.gemspec
+  gem spec *.gem version | grep -o 'version: .\+' | cut -d' ' -f2 | tee gem_version.txt
