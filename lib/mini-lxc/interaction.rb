@@ -15,6 +15,7 @@ class MiniLXC
 
       pid = Process.spawn({}, command, spawn_opts)
       wo.close
+      ro.binmode
 
       unless input.nil?
         ri.close
@@ -27,7 +28,7 @@ class MiniLXC
         wi.close
       end
 
-      buffer_size = options.delete(:out_chunk) || 16 * 1024
+      buffer_size = options.delete(:out_chunk) || 16 * 1024 * 1024
       while buffer = ro.read(buffer_size)
         output << buffer unless buffer.chomp.empty?
       end
