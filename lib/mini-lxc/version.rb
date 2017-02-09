@@ -1,5 +1,5 @@
 class MiniLXC
-  VERSION = "0.3.2"
+  VERSION = "0.4.0"
 
   module Version
     def lxc_version
@@ -9,11 +9,11 @@ class MiniLXC
     end
 
     def lxc_v1?
-      Gem::Requirement.new("~> 1") =~ lxc_version
+      Gem::Requirement.new("~> 1").satisfied_by? lxc_version
     end
 
     def lxc_v2?
-      Gem::Requirement.new("~> 2") =~ lxc_version
+      Gem::Requirement.new("~> 2").satisfied_by? lxc_version
     end
   end
 

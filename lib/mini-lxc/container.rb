@@ -82,7 +82,7 @@ class MiniLXC
       end
     end
 
-    def state(name)
+    def state
       api.info(name, ["-s"]) do |pid, status, output|
         raise "Could not read state of container #{name}. Does it exist? Output: #{output}" unless status.success?
         YAML.load(output)["State"]
@@ -98,21 +98,22 @@ class MiniLXC
       end
     end
 
-    def copy_file_from_host(source_path_on_host, target_path_on_container)
-      api.copy_from_host_to_container(name, source_path_on_host, target_path_on_container)
+    def copy_file_from_host(path_on_host, path_on_container)
+      api.copy_file_to_container(name, path_on_host, path_on_container)
     end
 
-    def read_file_from_container(path_on_container)
-      api.read_file_from_container(name, path_on_container)
+    def copy_file_to_host(path_on_container, path_on_host)
+      api.copy_file_from_container(name, path_on_container, path_on_host)
     end
 
-    def stream_from_host_to_container(ios, target_path_on_container)
-      api.stream_from_host_to_container(name, ios, target_path_on_container)
+    def tar_to_host(path_on_container, tarball_on_host)
+      api.tar_from_container(name, path_on_container, tarball_on_host)
     end
 
-    def stream_file_from_container(path_on_container, ios, &block)
-      api.stream_file_from_container(name, path_on_container, ios, &block)
+    def untar_from_host(tarball_on_host, path_on_container)
+      api.untar_to_container(name, tarball_on_host, path_on_container)
     end
+
   end
 
 end

@@ -1,25 +1,40 @@
 class MiniLXC
   module FileExchange
 
-    def copy_from_host_to_container(name, source_path_on_host, target_path_on_container)
-      log "[LXC] COPY TO CONTAINER #{name}: #{source_path_on_host} => #{target_path_on_container}"
-      attach(name, Shellwords.join(["mkdir", "-p", File.dirname(target_path_on_container)]), nil)
-      stream_from_host_to_container(name, File.open(source_path_on_host), target_path_on_container)
+    def copy_file_to_container(name, path_on_host, path_on_container, &block)
+      log "[LXC] COPY FILE TO CONTAINER #{name}: #{path_on_host} => #{path_on_container}"
+      command = Shellwords.join(["/bin/sh", "-c", "/bin/cat > " + Shellwords.escape(path_on_container)])
+
+      stream_stdin_to_container(name, command, File.open(path_on_host, "rb"), &block)
     end
 
-    def read_file_from_container(name, path_on_container)
-      log "[LXC] READ FILE IN CONTAINER #{name}: #{path_on_container}"
-      stream_file_from_container(name, path_on_container, nil)
+    def copy_file_from_container(name, path_on_container, path_on_host, &block)
+      log "[LXC] COPY FILE FROM CONTAINER #{name}: #{path_on_container} => #{path_on_host}"
+      command = Shellwords.join(["/bin/cat", path_on_container])
+
+      stream_stdout_from_container(name, command, File.open(path_on_host, "wb"), &block)
     end
 
-    def stream_from_host_to_container(name, ios, target_path_on_container, &block)
-      log "[LXC] STREAM TO CONTAINER #{name}: #{ios.inspect} => #{target_path_on_container}"
-      attach(name, Shellwords.join(["/bin/sh", "-c", "/bin/cat > " + Shellwords.escape(target_path_on_container)]), nil, :in => ios, &block)
+    def tar_from_container(name, path_on_container, tarball_on_host, &block)
+      log "[LXC] CREATING TARBALL FROM CONTAINER #{name}: #{path_on_container} => #{tarball_on_host}"
+      command = Shellwords.join(["tar", "zcpf", "-", "-C", path_on_container, "."])
+
+      stream_stdout_from_container(name, command, File.open(tarball_on_host, "wb"), &block)
     end
 
-    def stream_file_from_container(name, path_on_container, ios, &block)
-      log "[LXC] STREAM FILE IN CONTAINER #{name}: #{path_on_container} => #{ios.inspect}"
-      attach(name, Shellwords.join(["/bin/cat", path_on_container]), nil, :out => ios, &block)
+    def untar_to_container(name, tarball_on_host, path_on_container, &block)
+      log "[LXC] EXPLODING TARBALL TO CONTAINER #{name}: #{tarball_on_host} => #{path_on_container}"
+      command = Shellwords.join(["tar", "zxpf", "-", "-C", path_on_container])
+
+      stream_stdin_to_container(name, command, File.open(tarball_on_host, "rb"), &block)
+    end
+
+    def stream_stdin_to_container(name, command, ios, &block)
+      attach(name, command, nil, :in => ios, &block)
+    end
+
+    def stream_stdout_from_container(name, command, ios, &block)
+      attach(name, command, nil, :out => ios, &block)
     end
 
   end

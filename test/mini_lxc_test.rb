@@ -63,7 +63,7 @@ class MiniLXCTest < Minitest::Test
   def test_create_unprivileged
     stub_spawn(@api, 2, 0, "something") do
       # accepts short opts
-      @api.create_unprivileged("new-container", {:d => "ubuntu", :r => "trusty", :a => "amd64"})
+      @api.create_unprivileged("new-container", :d => "ubuntu", :r => "trusty", :a => "amd64")
 
       # accepts GNU longopts too
       @api.create_unprivileged("new-container", {:dist => "centos", :r => 7, :arch => "amd64"}, [], :out => StringIO.new(""))
