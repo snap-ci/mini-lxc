@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
 
   s.files      = Dir.glob("lib/**/*.rb")
 
+  s.add_development_dependency "rake", "10.5.0" # highest version supported by all rubies we care about
   s.add_development_dependency "minitest", "~> 5.10.1"
 
   s.homepage    = "https://github.com/snap-ci/mini-lxc"
