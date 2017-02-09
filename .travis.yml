@@ -3,7 +3,7 @@ language: ruby
 script: |
   set -e
   # default to rake 10.5.0 because it supports just about any ruby version we care about
-  which rake &> /dev/null || gem install rake -v 10.5.0
+  bundle exec rake --version &> /dev/null || gem install rake -v 10.5.0
   bundle exec rake test
   mkdir -p pkg
   gem build *.gemspec
