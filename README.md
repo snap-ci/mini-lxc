@@ -9,8 +9,9 @@ Minimalistic Ruby API for LXC
 
 ## mini-lxc supports a wide spectrum of Ruby versions
 
-* MRI support: *mini-lxc* has been tested on 1.8.7, 2.2.4, 2.3.3, and 2.4.0. It will likely work on any version in-between.
-* JRuby support: *mini-lxc* has been tested on JRuby 1.7.26 and JRuby 9.1.7.0. It will likely work on most versions of JRuby.
+* **MRI support**: *mini-lxc* has been tested on 1.9.3, 2.2.4, 2.3.3, and 2.4.0. It will likely work on any version in-between.
+    * 1.8.7 is unsupported as *mini-lxc* relies on `Process.spawn`, which was introduced in 1.9. Sorry. Happy to review/accept pull requests to support it if the implementation isn't too fugly.
+* **JRuby support**: *mini-lxc* has been tested on JRuby 1.7.26 and JRuby 9.1.7.0. It will likely work on most versions of JRuby.
 
 ## LXC 2 caveats and LXD
 *mini-lxc* _**does not yet support container management through the LXD client command,**_ `lxc`; *mini-lxc* uses the `lxc-*` client commands. While this is the default setup on Fedora (though, setting Fedora up to work with unprivileged containers is beyond the scope of this document), one must install the `lxc` transitional package for Ubuntu 16.04. This can be achieved by running:
@@ -18,6 +19,8 @@ Minimalistic Ruby API for LXC
 ```
 sudo apt-get install -y lxc2 lxc
 ```
+
+**LXD support will come soon.**
 
 ## Usage
 
@@ -68,3 +71,5 @@ lxc.destroy("mycontainer", ["-f"])
 ```
 
 ### High-level API: MiniLXC::Container
+
+I'll write this part soon.

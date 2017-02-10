@@ -1,7 +1,8 @@
 class MiniLXC
-  VERSION = "0.4.1"
 
   module Version
+    VERSION = "0.4.2"
+
     def lxc_version
       exec %w(lxc-ls --version) do |p, s, o|
         Gem::Version.new(o) if s.success?
