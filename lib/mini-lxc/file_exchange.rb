@@ -10,11 +10,15 @@ class MiniLXC
 
     def copy_file_from_container(name, container_file, host_file, &block)
       log "[LXC] COPY FILE FROM CONTAINER #{name}: #{container_file} => #{host_file}"
+      read_file_on_container(name, container_file, File.open(host_file, "wb"), &block)
+    end
+
+    def read_file_on_container(name, container_file, ios=nil, &block)
       command = Shellwords.join(["/bin/cat", container_file])
 
-      stream_stdout_from_container(name, command, File.open(host_file, "wb")) do |pid, status, ios|
-        ios.close
-        yield pid, status, ios if block_given?
+      stream_stdout_from_container(name, command, ios) do |pid, status, ios|
+        ios.close if ios.respond_to?(:close)
+        block_given? ? yield(pid, status, ios) : [pid, status, ios]
       end
     end
 
@@ -24,7 +28,7 @@ class MiniLXC
 
       stream_stdout_from_container(name, command, File.open(tarball_on_host, "wb")) do |pid, status, ios|
         ios.close
-        yield pid, status, ios if block_given?
+        block_given? ? yield(pid, status, ios) : [pid, status, ios]
       end
     end
 

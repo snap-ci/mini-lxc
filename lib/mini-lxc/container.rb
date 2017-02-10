@@ -106,6 +106,10 @@ class MiniLXC
       api.copy_file_from_container(name, path_on_container, path_on_host)
     end
 
+    def read_file_on_container(path_on_container, stdout=nil)
+      api.read_file_on_container(name, path_on_container, stdout)
+    end
+
     def tar_to_host(path_on_container, tarball_on_host)
       api.tar_from_container(name, path_on_container, tarball_on_host)
     end
